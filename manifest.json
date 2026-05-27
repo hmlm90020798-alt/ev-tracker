@@ -1,0 +1,19 @@
+{
+  "name": "EV Tracker · MG MGS5",
+  "short_name": "EV Tracker",
+  "description": "Consumos e poupança do MG MGS5 EV vs BMW X3",
+  "start_url": "/ev-tracker/",
+  "scope": "/ev-tracker/",
+  "display": "standalone",
+  "background_color": "#0e0e10",
+  "theme_color": "#0e0e10",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -6,6 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>EV Tracker · MG MGS5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
@@ -999,6 +1001,13 @@ function showToast(msg) {
   t.textContent=msg;
   t.style.transform='translateX(-50%) translateY(0)'; t.style.opacity='1';
   setTimeout(()=>{ t.style.transform='translateX(-50%) translateY(60px)'; t.style.opacity='0'; },2200);
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/ev-tracker/sw.js');
+  });
 }
 </script>
 </body>
