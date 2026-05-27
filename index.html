@@ -313,9 +313,10 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
   <div id="panel-despesas" class="panel">
     <div class="card">
       <div class="card-title">Registar despesa</div>
-      <div class="desp-type-selector">
-        <button class="type-btn active" id="dtype-iuc"     onclick="selectDespType('iuc')">🏷️ IUC</button>
-        <button class="type-btn"        id="dtype-revisao" onclick="selectDespType('revisao')">🔧 Revisão /<br>Manutenção</button>
+      <div class="desp-type-selector" style="grid-template-columns:repeat(4,1fr)">
+        <button class="type-btn active" id="dtype-iuc"      onclick="selectDespType('iuc')">🏷️ IUC</button>
+        <button class="type-btn"        id="dtype-seguro"   onclick="selectDespType('seguro')">🛡️ Seguro</button>
+        <button class="type-btn"        id="dtype-revisao"  onclick="selectDespType('revisao')">🔧 Revisão /<br>Manutenção</button>
         <button class="type-btn"        id="dtype-inspecao" onclick="selectDespType('inspecao')">📋 Inspeção</button>
       </div>
       <div class="form-grid">
@@ -389,10 +390,11 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
       <div class="card-title">Detalhe por categoria</div>
       <div class="metrics metrics-3">
         <div class="metric"><div class="metric-label">Combustível / Energia</div><div class="metric-val green" id="a-energia">—</div></div>
+        <div class="metric"><div class="metric-label">Seguro</div><div class="metric-val" id="a-seguro">—</div></div>
         <div class="metric"><div class="metric-label">IUC</div><div class="metric-val" id="a-iuc">—</div></div>
-        <div class="metric"><div class="metric-label">Revisões / Manutenção</div><div class="metric-val" id="a-revisao">—</div></div>
       </div>
-      <div class="metrics">
+      <div class="metrics metrics-3">
+        <div class="metric"><div class="metric-label">Revisões / Manutenção</div><div class="metric-val" id="a-revisao">—</div></div>
         <div class="metric"><div class="metric-label">Inspeções</div><div class="metric-val" id="a-inspecao">—</div></div>
         <div class="metric"><div class="metric-label">Km registados (ano)</div><div class="metric-val" id="a-km">—</div></div>
       </div>
@@ -464,8 +466,8 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
 
 const DEFAULT_CONF = { vazia:0.094, cheia:0.182, tarifa:'vazia', gasoleo:1.63, consBmw:7.5, batCap:64.9 };
-const DESP_LABELS = { iuc:'IUC', revisao:'Revisão / Manutenção', inspecao:'Inspeção' };
-const DESP_ICONS  = { iuc:'🏷️', revisao:'🔧', inspecao:'📋' };
+const DESP_LABELS = { iuc:'IUC', seguro:'Seguro', revisao:'Revisão / Manutenção', inspecao:'Inspeção' };
+const DESP_ICONS  = { iuc:'🏷️', seguro:'🛡️', revisao:'🔧', inspecao:'📋' };
 
 let sessions  = {};
 let despesas  = {};
@@ -637,7 +639,7 @@ window.deleteSession = function(key) {
 // ── Despesas ──────────────────────────────────────────────────
 window.selectDespType = function(type) {
   despType = type;
-  ['iuc','revisao','inspecao'].forEach(t => {
+  ['iuc','seguro','revisao','inspecao'].forEach(t => {
     document.getElementById('dtype-'+t).classList.toggle('active', t===type);
   });
 };
@@ -796,14 +798,16 @@ window.renderAnual = function() {
   const sum = (arr,tipo) => arr.filter(d=>d.tipo===tipo).reduce((a,d)=>a+d.valor,0);
 
   const mgIuc      = sum(mgDesp,'iuc');
+  const mgSeguro   = sum(mgDesp,'seguro');
   const mgRevisao  = sum(mgDesp,'revisao');
   const mgInspecao = sum(mgDesp,'inspecao');
-  const mgTotal    = mgEnergia + mgIuc + mgRevisao + mgInspecao;
+  const mgTotal    = mgEnergia + mgIuc + mgSeguro + mgRevisao + mgInspecao;
 
   const bmwIuc      = sum(bmwDesp,'iuc');
+  const bmwSeguro   = sum(bmwDesp,'seguro');
   const bmwRevisao  = sum(bmwDesp,'revisao');
   const bmwInspecao = sum(bmwDesp,'inspecao');
-  const bmwTotal    = bmwCombust + bmwIuc + bmwRevisao + bmwInspecao;
+  const bmwTotal    = bmwCombust + bmwIuc + bmwSeguro + bmwRevisao + bmwInspecao;
 
   const totalSaving = bmwTotal - mgTotal;
 
@@ -824,17 +828,20 @@ window.renderAnual = function() {
     ? `<div class="cost-line"><span>${label}</span><strong>${val.toFixed(2)} €</strong></div>` : '';
   document.getElementById('a-mg-breakdown').innerHTML =
     fmtLine('Energia (carregamentos)', mgEnergia)+
+    fmtLine('Seguro', mgSeguro)+
     fmtLine('IUC', mgIuc)+
     fmtLine('Revisões / Manutenção', mgRevisao)+
     fmtLine('Inspeções', mgInspecao);
   document.getElementById('a-bmw-breakdown').innerHTML =
     fmtLine('Combustível estimado', bmwCombust)+
+    fmtLine('Seguro', bmwSeguro)+
     fmtLine('IUC', bmwIuc)+
     fmtLine('Revisões / Manutenção', bmwRevisao)+
     fmtLine('Inspeções', bmwInspecao);
 
   // detail metrics
   document.getElementById('a-energia').innerHTML  = mgEnergia.toFixed(2)+'<span>€</span>';
+  document.getElementById('a-seguro').innerHTML   = mgSeguro>0 ? mgSeguro.toFixed(2)+'<span>€</span>' : '—';
   document.getElementById('a-iuc').innerHTML      = mgIuc>0 ? mgIuc.toFixed(2)+'<span>€</span>' : '—';
   document.getElementById('a-revisao').innerHTML  = mgRevisao>0 ? mgRevisao.toFixed(2)+'<span>€</span>' : '—';
   document.getElementById('a-inspecao').innerHTML = mgInspecao>0 ? mgInspecao.toFixed(2)+'<span>€</span>' : '—';
@@ -844,10 +851,11 @@ window.renderAnual = function() {
   const canvas = document.getElementById('annualChart');
   if(annualChart){ annualChart.destroy(); annualChart=null; }
   const segments = [
-    { label:'Energia', val:mgEnergia, color:'#1aad7a' },
-    { label:'IUC',     val:mgIuc,     color:'#4a90e2' },
-    { label:'Revisões',val:mgRevisao, color:'#a78bfa' },
-    { label:'Inspeções',val:mgInspecao,color:'#e8971a' }
+    { label:'Energia',   val:mgEnergia,  color:'#1aad7a' },
+    { label:'Seguro',    val:mgSeguro,   color:'#e85a5a' },
+    { label:'IUC',       val:mgIuc,      color:'#4a90e2' },
+    { label:'Revisões',  val:mgRevisao,  color:'#a78bfa' },
+    { label:'Inspeções', val:mgInspecao, color:'#e8971a' }
   ].filter(s=>s.val>0);
   if(segments.length===0){
     canvas.style.display='none';
