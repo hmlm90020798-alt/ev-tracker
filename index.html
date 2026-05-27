@@ -254,22 +254,49 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
         </div>
       </div>
       <div class="divider"></div>
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">Preços nesta sessão</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Gasóleo (€/litro)</label>
-          <input type="number" id="f-gasoleo" step="0.001" min="0">
-        </div>
-        <div class="form-group">
-          <label>Tarifa elétrica</label>
-          <select id="f-tarifa">
-            <option value="vazia">Vazia (noturna)</option>
-            <option value="cheia">Cheia (diurna)</option>
-            <option value="media">Misto 50/50</option>
-          </select>
-        </div>
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">Carregamento</div>
+      <div class="desp-type-selector" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+        <button class="type-btn active" id="ctype-casa"    onclick="selectChargeType('casa')">🏠 Em casa</button>
+        <button class="type-btn"        id="ctype-estacao" onclick="selectChargeType('estacao')">⚡ Estação pública</button>
       </div>
-      <p class="form-note">Pré-preenchido com a configuração atual. Ajusta se o preço do gasóleo mudou esta semana.</p>
+
+      <!-- Casa -->
+      <div id="charge-casa">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Gasóleo (€/litro)</label>
+            <input type="number" id="f-gasoleo" step="0.001" min="0">
+          </div>
+          <div class="form-group">
+            <label>Tarifa elétrica</label>
+            <select id="f-tarifa">
+              <option value="vazia">Vazia (noturna)</option>
+              <option value="cheia">Cheia (diurna)</option>
+              <option value="media">Misto 50/50</option>
+            </select>
+          </div>
+        </div>
+        <p class="form-note">Pré-preenchido com a configuração atual. Ajusta se o preço do gasóleo mudou esta semana.</p>
+      </div>
+
+      <!-- Estação pública -->
+      <div id="charge-estacao" style="display:none">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Gasóleo (€/litro)</label>
+            <input type="number" id="f-gasoleo-est" step="0.001" min="0">
+          </div>
+          <div class="form-group">
+            <label>Custo total pago na estação (€)</label>
+            <input type="number" id="f-est-custo" step="0.01" min="0" placeholder="ex: 12.50">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Nome da rede / estação (opcional)</label>
+            <input type="text" id="f-est-nome" placeholder="ex: Galp EV, EDP RE, Zap…">
+          </div>
+        </div>
+        <p class="form-note" style="border-left-color:var(--amber)">O custo real de carregamento será o valor do recibo da estação. O kWh/100km é calculado igualmente pela bateria consumida.</p>
+      </div>
       <p class="error-msg" id="f-error"></p>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn btn-primary" id="btn-submit" onclick="submitSession()">+ Adicionar sessão</button>
@@ -490,10 +517,9 @@ function loadConfToForm() {
   document.getElementById('c-bat-cap').value = conf.batCap;
 }
 function prefillSessionPrices() {
-  if (!document.getElementById('f-gasoleo').dataset.edited)
-    document.getElementById('f-gasoleo').value = conf.gasoleo;
-  if (!document.getElementById('f-tarifa').dataset.edited)
-    document.getElementById('f-tarifa').value = conf.tarifa;
+  document.getElementById('f-gasoleo').value     = conf.gasoleo;
+  document.getElementById('f-gasoleo-est').value = conf.gasoleo;
+  document.getElementById('f-tarifa').value      = conf.tarifa;
 }
 window.saveConfig = function() {
   const nc = {
@@ -511,17 +537,30 @@ window.saveConfig = function() {
 };
 
 // ── Sessions ──────────────────────────────────────────────────
+let chargeType = 'casa';
+
+window.selectChargeType = function(type) {
+  chargeType = type;
+  document.getElementById('ctype-casa').classList.toggle('active', type==='casa');
+  document.getElementById('ctype-estacao').classList.toggle('active', type==='estacao');
+  document.getElementById('charge-casa').style.display    = type==='casa'    ? '' : 'none';
+  document.getElementById('charge-estacao').style.display = type==='estacao' ? '' : 'none';
+};
+
 function getTarifaVal(key) {
   if (key==='vazia') return conf.vazia;
   if (key==='cheia') return conf.cheia;
   return (conf.vazia+conf.cheia)/2;
 }
-function buildRecord(date,km,batStart,batEnd,kmRest,gasoleo,tarifaKey) {
+function buildRecord(date,km,batStart,batEnd,kmRest,gasoleo,tarifaKey,estacao) {
   const kwh     = ((batStart-batEnd)/100)*conf.batCap;
-  const evCost  = kwh*getTarifaVal(tarifaKey);
+  const evCost  = estacao ? estacao.custo : kwh*getTarifaVal(tarifaKey);
   const bmwCost = (km/100)*conf.consBmw*gasoleo;
-  return { date,km,batStart,batEnd,kmRest:kmRest||0,gasoleo,tarifaKey,kwh,
+  const rec = { date,km,batStart,batEnd,kmRest:kmRest||0,gasoleo,kwh,
     evCost,bmwCost,saving:bmwCost-evCost,kwh100:km>0?(kwh/km)*100:0,ts:Date.now() };
+  if (estacao) { rec.chargeType='estacao'; rec.estacaoNome=estacao.nome||''; rec.estacaoCusto=estacao.custo; }
+  else { rec.chargeType='casa'; rec.tarifaKey=tarifaKey; }
+  return rec;
 }
 window.submitSession = function() {
   const date     = document.getElementById('f-date').value.trim();
@@ -529,13 +568,24 @@ window.submitSession = function() {
   const batStart = parseFloat(document.getElementById('f-bat-start').value);
   const batEnd   = parseFloat(document.getElementById('f-bat-end').value);
   const kmRest   = parseFloat(document.getElementById('f-km-rest').value)||0;
-  const gasoleo  = parseFloat(document.getElementById('f-gasoleo').value)||conf.gasoleo;
-  const tarifaKey= document.getElementById('f-tarifa').value;
+
   if (!date||isNaN(km)||km<=0){ showError('f-error','Preenche a data e os km percorridos.'); return; }
   if (isNaN(batStart)||isNaN(batEnd)){ showError('f-error','Preenche as percentagens de bateria.'); return; }
   if (batEnd>=batStart){ showError('f-error','A bateria no fim deve ser inferior ao início.'); return; }
+
+  let gasoleo, tarifaKey=null, estacao=null;
+  if (chargeType==='estacao') {
+    gasoleo = parseFloat(document.getElementById('f-gasoleo-est').value)||conf.gasoleo;
+    const custo = parseFloat(document.getElementById('f-est-custo').value);
+    if (isNaN(custo)||custo<=0){ showError('f-error','Indica o custo total pago na estação.'); return; }
+    estacao = { custo, nome: document.getElementById('f-est-nome').value.trim() };
+  } else {
+    gasoleo  = parseFloat(document.getElementById('f-gasoleo').value)||conf.gasoleo;
+    tarifaKey= document.getElementById('f-tarifa').value;
+  }
+
   document.getElementById('f-error').style.display='none';
-  const record = buildRecord(date,km,batStart,batEnd,kmRest,gasoleo,tarifaKey);
+  const record = buildRecord(date,km,batStart,batEnd,kmRest,gasoleo,tarifaKey,estacao);
   setSyncStatus('syncing','A guardar…');
   const p = editKey ? update(ref(db,'sessions/'+editKey),record) : push(ref(db,'sessions'),record);
   p.then(()=>{ setSyncStatus('online','Sincronizado'); showToast(editKey?'Sessão atualizada!':'Sessão adicionada!'); cancelEdit(); if(!editKey) switchTab('dashboard'); })
@@ -548,8 +598,16 @@ window.editSession = function(key) {
   document.getElementById('f-bat-start').value=s.batStart;
   document.getElementById('f-bat-end').value  =s.batEnd;
   document.getElementById('f-km-rest').value  =s.kmRest||'';
-  document.getElementById('f-gasoleo').value  =s.gasoleo||conf.gasoleo;
-  document.getElementById('f-tarifa').value   =s.tarifaKey||conf.tarifa;
+  if (s.chargeType==='estacao') {
+    selectChargeType('estacao');
+    document.getElementById('f-gasoleo-est').value =s.gasoleo||conf.gasoleo;
+    document.getElementById('f-est-custo').value   =s.estacaoCusto||'';
+    document.getElementById('f-est-nome').value    =s.estacaoNome||'';
+  } else {
+    selectChargeType('casa');
+    document.getElementById('f-gasoleo').value =s.gasoleo||conf.gasoleo;
+    document.getElementById('f-tarifa').value  =s.tarifaKey||conf.tarifa;
+  }
   document.getElementById('edit-banner').style.display='block';
   document.getElementById('form-title').textContent='Editar sessão';
   document.getElementById('btn-submit').textContent='✓ Guardar alterações';
@@ -558,7 +616,8 @@ window.editSession = function(key) {
 };
 window.cancelEdit = function() {
   editKey=null;
-  ['f-date','f-km','f-bat-start','f-bat-end','f-km-rest'].forEach(id=>document.getElementById(id).value='');
+  ['f-date','f-km','f-bat-start','f-bat-end','f-km-rest','f-est-custo','f-est-nome'].forEach(id=>document.getElementById(id).value='');
+  selectChargeType('casa');
   prefillSessionPrices();
   document.getElementById('edit-banner').style.display='none';
   document.getElementById('form-title').textContent='Nova sessão de utilização';
@@ -650,7 +709,15 @@ function renderSessions() {
   const list=document.getElementById('sessions-list');
   const arr=Object.entries(sessions).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
   if(arr.length===0){ list.innerHTML='<div class="empty">Sem sessões registadas ainda.</div>'; return; }
-  list.innerHTML=arr.map(([key,s])=>`
+  list.innerHTML=arr.map(([key,s])=>{
+    const isEst = s.chargeType==='estacao';
+    const chargeInfo = isEst
+      ? `estação pública${s.estacaoNome?' · '+s.estacaoNome:''} · ${s.estacaoCusto.toFixed(2)} € (recibo)`
+      : `gasóleo ${parseFloat(s.gasoleo||conf.gasoleo).toFixed(3)} €/L`;
+    const chargeBadge = isEst
+      ? `<span class="badge" style="background:rgba(74,144,226,0.12);color:var(--blue)">⚡ ${s.estacaoNome||'Estação pública'}</span>`
+      : '';
+    return `
     <div class="session-card">
       <div class="session-info">
         <div class="session-header">
@@ -659,9 +726,10 @@ function renderSessions() {
           <span class="session-bat">${s.batStart}% → ${s.batEnd}%</span>
         </div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:4px">
-          ${s.kwh.toFixed(2)} kWh · ${s.kwh100.toFixed(1)} kWh/100km · gasóleo ${parseFloat(s.gasoleo||conf.gasoleo).toFixed(3)} €/L
+          ${s.kwh.toFixed(2)} kWh · ${s.kwh100.toFixed(1)} kWh/100km · ${chargeInfo}
         </div>
         <div class="session-badges">
+          ${chargeBadge}
           <span class="badge badge-ev">⚡ ${s.evCost.toFixed(2)} €</span>
           <span class="badge badge-gas">⛽ ${s.bmwCost.toFixed(2)} €</span>
           <span class="badge ${s.saving>=0?'badge-save':'badge-loss'}">${s.saving>=0?'↓ ':'↑ '}${Math.abs(s.saving).toFixed(2)} € ${s.saving>=0?'poupado':'extra'}</span>
@@ -671,7 +739,8 @@ function renderSessions() {
         <button class="btn btn-icon btn-edit" onclick="editSession('${key}')" title="Editar">✎</button>
         <button class="btn btn-icon" onclick="deleteSession('${key}')" title="Apagar">✕</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderDespesas() {
