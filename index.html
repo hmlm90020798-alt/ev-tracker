@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>EV Tracker · MG MGS5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:#0e0e10;--bg2:#18181c;--bg3:#222228;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+  --text:#f0efea;--text2:#9998a0;--text3:#5c5b65;
+  --green:#1aad7a;--green-dim:rgba(26,173,122,0.12);
+  --amber:#e8971a;--amber-dim:rgba(232,151,26,0.12);
+  --red:#e85a5a;--red-dim:rgba(232,90,90,0.1);
+  --blue:#4a90e2;--blue-dim:rgba(74,144,226,0.12);
+  --radius:14px;--radius-sm:9px;
+  --font:'DM Sans',sans-serif;--font-display:'Fraunces',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.5}
+body{overscroll-behavior:none}
+
+.shell{display:flex;flex-direction:column;min-height:100vh;max-width:680px;margin:0 auto;padding:0 16px}
+header{padding:24px 0 16px;border-bottom:0.5px solid var(--border);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
+.logo-title{font-family:var(--font-display);font-weight:600;font-size:21px;color:var(--text);letter-spacing:-0.3px}
+.logo-sub{font-size:11px;color:var(--text3);letter-spacing:0.04em;margin-top:1px}
+.sync-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background 0.3s}
+.sync-dot.online{background:var(--green)}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite}
+.sync-dot.error{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.tabs{display:flex;gap:4px;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:18px}
+.tab{flex:1;padding:8px;font-size:13px;font-family:var(--font);border:none;background:transparent;color:var(--text2);cursor:pointer;border-radius:9px;transition:all 0.18s;font-weight:400}
+.tab.active{background:var(--bg3);color:var(--text);font-weight:500}
+
+.panel{display:none}.panel.active{display:block}
+
+.card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px}
+
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.metrics-4{grid-template-columns:repeat(4,1fr)}
+.metric{background:var(--bg3);border-radius:var(--radius-sm);padding:12px}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:5px}
+.metric-val{font-size:20px;font-weight:500;color:var(--text);line-height:1}
+.metric-val span{font-size:11px;font-weight:400;color:var(--text2);margin-left:2px}
+
+.savings-hero{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.savings-num{font-family:var(--font-display);font-size:38px;font-weight:600;color:var(--green);letter-spacing:-1px;line-height:1}
+.savings-lbl{font-size:13px;color:var(--text2)}
+.savings-sub{font-size:12px;color:var(--text3);flex-wrap:wrap}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:12px;color:var(--text2)}
+input[type="number"],input[type="text"],select{
+  width:100%;padding:10px 12px;font-size:14px;font-family:var(--font);
+  background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);
+  color:var(--text);outline:none;transition:border-color 0.15s;-webkit-appearance:none
+}
+input:focus,select:focus{border-color:var(--green)}
+select option{background:var(--bg3)}
+
+.btn{padding:10px 18px;font-size:14px;font-family:var(--font);font-weight:500;border-radius:var(--radius-sm);cursor:pointer;border:0.5px solid var(--border2);background:transparent;color:var(--text);transition:all 0.15s}
+.btn:hover{background:var(--bg3)}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--green);color:#000;border-color:transparent;font-weight:600;width:100%;padding:12px;font-size:15px}
+.btn-primary:hover{background:#1ec98d}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-icon{padding:7px 9px;border-radius:8px;font-size:13px;color:var(--text3);border-color:transparent}
+.btn-icon:hover{background:var(--red-dim);color:var(--red)}
+.btn-edit{color:var(--text3)}
+.btn-edit:hover{background:var(--blue-dim);color:var(--blue)}
+
+.price-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.price-row:last-child{margin-bottom:0}
+.price-label{flex:1;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-ev{background:var(--green)}.dot-gas{background:var(--amber)}.dot-conf{background:var(--blue)}
+.price-row input{width:100px;text-align:right;flex-shrink:0}
+
+.sessions-list{display:flex;flex-direction:column;gap:8px}
+.session-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.session-info{flex:1;min-width:0}
+.session-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.session-date{font-size:12px;color:var(--text3)}
+.session-km{font-size:13px;font-weight:500;color:var(--text)}
+.session-bat{font-size:12px;color:var(--text2)}
+.session-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.badge{font-size:11px;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.badge-ev{background:var(--green-dim);color:var(--green)}
+.badge-gas{background:var(--amber-dim);color:var(--amber)}
+.badge-save{background:rgba(26,173,122,0.08);color:var(--green);border:0.5px solid rgba(26,173,122,0.2)}
+.badge-loss{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(232,90,90,0.2)}
+.session-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+
+.chart-wrap{position:relative;width:100%;height:220px}
+.chart-legend{display:flex;gap:16px;margin-bottom:10px;font-size:12px;color:var(--text2);flex-wrap:wrap}
+.legend-dot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:middle}
+
+.empty{text-align:center;padding:32px 16px;color:var(--text3);font-size:13px;line-height:1.8}
+.error-msg{font-size:12px;color:var(--red);margin-top:8px;display:none}
+.divider{height:0.5px;background:var(--border);margin:14px 0}
+.form-note{font-size:12px;color:var(--text3);margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm);border-left:2px solid var(--green)}
+.edit-banner{background:var(--blue-dim);border:0.5px solid rgba(74,144,226,0.25);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--blue);display:none}
+
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999;transition:opacity 0.4s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text3)}
+
+footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;color:var(--text3)}
+
+@media(max-width:480px){
+  .metrics-4{grid-template-columns:1fr 1fr}
+  .metric-val{font-size:17px}
+  .savings-num{font-size:30px}
+  .price-row{flex-wrap:wrap}
+  .price-row input{width:80px}
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">A ligar à base de dados…</div>
+</div>
+
+<div class="shell">
+  <header>
+    <div>
+      <div class="logo-title">⚡ EV Tracker</div>
+      <div class="logo-sub">MG MGS5 EV · Consumos & Poupança</div>
+    </div>
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">A ligar…</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+    <button class="tab" onclick="switchTab('registar')">Registar</button>
+    <button class="tab" onclick="switchTab('config')">Configurar</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="panel-dashboard" class="panel active">
+    <div class="card">
+      <div class="card-title">Poupança acumulada vs BMW X3</div>
+      <div class="savings-hero">
+        <div class="savings-num" id="d-saving">—</div>
+        <div class="savings-lbl">poupados</div>
+      </div>
+      <div class="savings-sub" id="d-sub">A carregar dados…</div>
+    </div>
+
+    <div class="metrics metrics-4">
+      <div class="metric"><div class="metric-label">Km totais</div><div class="metric-val" id="d-km">—</div></div>
+      <div class="metric"><div class="metric-label">kWh consumidos</div><div class="metric-val" id="d-kwh">—</div></div>
+      <div class="metric"><div class="metric-label">Custo EV</div><div class="metric-val" id="d-ev-cost">—</div></div>
+      <div class="metric"><div class="metric-label">Custo BMW equiv.</div><div class="metric-val" id="d-bmw-cost">—</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Custo por sessão</div>
+      <div class="chart-legend">
+        <span><span class="legend-dot" style="background:#1aad7a"></span>MG MGS5 EV</span>
+        <span><span class="legend-dot" style="background:#e8971a"></span>BMW X3 equivalente</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="costChart" role="img" aria-label="Gráfico de custo por sessão EV vs BMW">Sem dados ainda.</canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Eficiência média</div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">kWh / 100 km</div><div class="metric-val" id="d-kwh100">—</div></div>
+        <div class="metric"><div class="metric-label">Sessões</div><div class="metric-val" id="d-sessoes">—</div></div>
+        <div class="metric"><div class="metric-label">% bat. / sessão</div><div class="metric-val" id="d-pct">—</div></div>
+        <div class="metric"><div class="metric-label">Poupança / 100km</div><div class="metric-val" id="d-sav100">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGISTAR -->
+  <div id="panel-registar" class="panel">
+    <div class="card">
+      <div class="edit-banner" id="edit-banner">A editar sessão — confirma os valores e guarda.</div>
+      <div class="card-title" id="form-title">Nova sessão de utilização</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data</label>
+          <input type="text" id="f-date" placeholder="ex: 27 Mai">
+        </div>
+        <div class="form-group">
+          <label>Km percorridos</label>
+          <input type="number" id="f-km" placeholder="350" min="1">
+        </div>
+        <div class="form-group">
+          <label>Bateria início (%)</label>
+          <input type="number" id="f-bat-start" placeholder="100" min="1" max="100">
+        </div>
+        <div class="form-group">
+          <label>Bateria fim (%)</label>
+          <input type="number" id="f-bat-end" placeholder="32" min="0" max="99">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label>Km de autonomia restante (indicado pelo carro)</label>
+          <input type="number" id="f-km-rest" placeholder="110" min="0">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">Preços nesta sessão</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Gasóleo (€/litro)</label>
+          <input type="number" id="f-gasoleo" step="0.001" min="0">
+        </div>
+        <div class="form-group">
+          <label>Tarifa elétrica</label>
+          <select id="f-tarifa">
+            <option value="vazia">Vazia (noturna)</option>
+            <option value="cheia">Cheia (diurna)</option>
+            <option value="media">Misto 50/50</option>
+          </select>
+        </div>
+      </div>
+      <p class="form-note">Pré-preenchido com a configuração atual. Ajusta se o preço do gasóleo mudou esta semana.</p>
+      <p class="error-msg" id="f-error"></p>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn-primary btn" id="btn-submit" onclick="submitSession()">+ Adicionar sessão</button>
+        <button class="btn" id="btn-cancel" onclick="cancelEdit()" style="display:none;width:auto;padding:12px 16px">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Histórico</div>
+      <div class="sessions-list" id="sessions-list">
+        <div class="empty">A carregar…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div id="panel-config" class="panel">
+    <div class="card">
+      <div class="card-title">Tarifas de eletricidade</div>
+      <div class="price-row">
+        <div class="price-label"><span class="dot dot-ev"></span>Tarifa vazia — noturna (€/kWh)</div>
+        <input type="number" id="c-vazia" step="0.001" min="0">
+      </div>
+      <div class="price-row">
+        <div class="price-label"><span class="dot dot-ev"></span>Tarifa cheia — diurna (€/kWh)</div>
+        <input type="number" id="c-cheia" step="0.001" min="0">
+      </div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label>Período de carregamento habitual</label>
+        <select id="c-tarifa">
+          <option value="vazia">Vazia — noturno (mais barato)</option>
+          <option value="cheia">Cheia — diurno</option>
+          <option value="media">Misto 50/50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Referência BMW X3</div>
+      <div class="price-row">
+        <div class="price-label"><span class="dot dot-gas"></span>Gasóleo de referência (€/litro)</div>
+        <input type="number" id="c-gasoleo" step="0.001" min="0">
+      </div>
+      <div class="price-row">
+        <div class="price-label"><span class="dot dot-gas"></span>Consumo BMW X3 (L/100km)</div>
+        <input type="number" id="c-cons-bmw" step="0.1" min="0">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Veículo elétrico</div>
+      <div class="price-row">
+        <div class="price-label"><span class="dot dot-conf"></span>Capacidade da bateria (kWh)</div>
+        <input type="number" id="c-bat-cap" step="0.1" min="1">
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-top:8px">MG MGS5 EV — bateria CATL LFP 64,9 kWh bruta</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveConfig()">Guardar configuração</button>
+  </div>
+
+  <footer>Dados sincronizados via Firebase · Acessível em qualquer dispositivo</footer>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcCuRQBEBh_w6mUePMxfBNjB9KxQLpq3A",
+  authDomain: "ev-tracker-mgs5.firebaseapp.com",
+  databaseURL: "https://ev-tracker-mgs5-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ev-tracker-mgs5",
+  storageBucket: "ev-tracker-mgs5.firebasestorage.app",
+  messagingSenderId: "977408236396",
+  appId: "1:977408236396:web:ef57a56b69cdb1673fb149"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const DEFAULT_CONF = { vazia:0.094, cheia:0.182, tarifa:'vazia', gasoleo:1.63, consBmw:7.5, batCap:64.9 };
+
+let sessions = {};
+let conf = { ...DEFAULT_CONF };
+let editKey = null;
+let chart = null;
+let dbReady = false;
+
+// ── Sync status ──────────────────────────────────────────────
+function setSyncStatus(state, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = label;
+}
+
+// ── Firebase listeners ────────────────────────────────────────
+onValue(ref(db, 'conf'), snap => {
+  conf = { ...DEFAULT_CONF, ...(snap.val() || {}) };
+  loadConfToForm();
+  prefillSessionPrices();
+}, err => setSyncStatus('error', 'Erro de ligação'));
+
+onValue(ref(db, 'sessions'), snap => {
+  sessions = snap.val() || {};
+  dbReady = true;
+  document.getElementById('loading').classList.add('hidden');
+  setSyncStatus('online', 'Sincronizado');
+  renderAll();
+}, err => {
+  setSyncStatus('error', 'Erro de ligação');
+  document.getElementById('loading').classList.add('hidden');
+});
+
+// ── Config ────────────────────────────────────────────────────
+function loadConfToForm() {
+  document.getElementById('c-vazia').value = conf.vazia;
+  document.getElementById('c-cheia').value = conf.cheia;
+  document.getElementById('c-tarifa').value = conf.tarifa;
+  document.getElementById('c-gasoleo').value = conf.gasoleo;
+  document.getElementById('c-cons-bmw').value = conf.consBmw;
+  document.getElementById('c-bat-cap').value = conf.batCap;
+}
+
+function prefillSessionPrices() {
+  if (!document.getElementById('f-gasoleo').dataset.edited)
+    document.getElementById('f-gasoleo').value = conf.gasoleo;
+  if (!document.getElementById('f-tarifa').dataset.edited)
+    document.getElementById('f-tarifa').value = conf.tarifa;
+}
+
+window.saveConfig = function() {
+  const newConf = {
+    vazia:  parseFloat(document.getElementById('c-vazia').value)    || DEFAULT_CONF.vazia,
+    cheia:  parseFloat(document.getElementById('c-cheia').value)    || DEFAULT_CONF.cheia,
+    tarifa: document.getElementById('c-tarifa').value,
+    gasoleo:parseFloat(document.getElementById('c-gasoleo').value)  || DEFAULT_CONF.gasoleo,
+    consBmw:parseFloat(document.getElementById('c-cons-bmw').value) || DEFAULT_CONF.consBmw,
+    batCap: parseFloat(document.getElementById('c-bat-cap').value)  || DEFAULT_CONF.batCap
+  };
+  setSyncStatus('syncing', 'A guardar…');
+  set(ref(db, 'conf'), newConf)
+    .then(() => { setSyncStatus('online', 'Sincronizado'); showToast('Configuração guardada'); })
+    .catch(() => setSyncStatus('error', 'Erro ao guardar'));
+};
+
+// ── Session helpers ───────────────────────────────────────────
+function getTarifaValue(key) {
+  if (key === 'vazia') return conf.vazia;
+  if (key === 'cheia') return conf.cheia;
+  return (conf.vazia + conf.cheia) / 2;
+}
+
+function buildRecord(date, km, batStart, batEnd, kmRest, gasoleo, tarifaKey) {
+  const kwh = ((batStart - batEnd) / 100) * conf.batCap;
+  const tarifaVal = getTarifaValue(tarifaKey);
+  const evCost  = kwh * tarifaVal;
+  const bmwCost = (km / 100) * conf.consBmw * gasoleo;
+  return {
+    date, km, batStart, batEnd, kmRest: kmRest || 0,
+    gasoleo, tarifaKey, kwh,
+    evCost, bmwCost,
+    saving: bmwCost - evCost,
+    kwh100: km > 0 ? (kwh / km) * 100 : 0,
+    ts: Date.now()
+  };
+}
+
+// ── Submit / Edit ─────────────────────────────────────────────
+window.submitSession = function() {
+  const date     = document.getElementById('f-date').value.trim();
+  const km       = parseFloat(document.getElementById('f-km').value);
+  const batStart = parseFloat(document.getElementById('f-bat-start').value);
+  const batEnd   = parseFloat(document.getElementById('f-bat-end').value);
+  const kmRest   = parseFloat(document.getElementById('f-km-rest').value) || 0;
+  const gasoleo  = parseFloat(document.getElementById('f-gasoleo').value) || conf.gasoleo;
+  const tarifaKey= document.getElementById('f-tarifa').value;
+
+  if (!date || isNaN(km) || km <= 0) { showError('Preenche a data e os km percorridos.'); return; }
+  if (isNaN(batStart) || isNaN(batEnd)) { showError('Preenche as percentagens de bateria.'); return; }
+  if (batEnd >= batStart) { showError('A bateria no fim deve ser inferior ao início.'); return; }
+  document.getElementById('f-error').style.display = 'none';
+
+  const record = buildRecord(date, km, batStart, batEnd, kmRest, gasoleo, tarifaKey);
+  setSyncStatus('syncing', 'A guardar…');
+
+  const promise = editKey
+    ? update(ref(db, 'sessions/' + editKey), record)
+    : push(ref(db, 'sessions'), record);
+
+  promise
+    .then(() => {
+      setSyncStatus('online', 'Sincronizado');
+      showToast(editKey ? 'Sessão atualizada!' : 'Sessão adicionada!');
+      cancelEdit();
+      if (!editKey) switchTab('dashboard');
+    })
+    .catch(() => setSyncStatus('error', 'Erro ao guardar'));
+};
+
+window.editSession = function(key) {
+  const s = sessions[key];
+  editKey = key;
+  document.getElementById('f-date').value     = s.date;
+  document.getElementById('f-km').value       = s.km;
+  document.getElementById('f-bat-start').value= s.batStart;
+  document.getElementById('f-bat-end').value  = s.batEnd;
+  document.getElementById('f-km-rest').value  = s.kmRest || '';
+  document.getElementById('f-gasoleo').value  = s.gasoleo || conf.gasoleo;
+  document.getElementById('f-tarifa').value   = s.tarifaKey || conf.tarifa;
+  document.getElementById('edit-banner').style.display = 'block';
+  document.getElementById('form-title').textContent    = 'Editar sessão';
+  document.getElementById('btn-submit').textContent    = '✓ Guardar alterações';
+  document.getElementById('btn-cancel').style.display  = 'block';
+  switchTab('registar');
+  window.scrollTo(0, 0);
+};
+
+window.cancelEdit = function() {
+  editKey = null;
+  ['f-date','f-km','f-bat-start','f-bat-end','f-km-rest'].forEach(id => document.getElementById(id).value = '');
+  prefillSessionPrices();
+  document.getElementById('edit-banner').style.display = 'none';
+  document.getElementById('form-title').textContent    = 'Nova sessão de utilização';
+  document.getElementById('btn-submit').textContent    = '+ Adicionar sessão';
+  document.getElementById('btn-cancel').style.display  = 'none';
+  document.getElementById('f-error').style.display     = 'none';
+};
+
+window.deleteSession = function(key) {
+  if (!confirm('Apagar esta sessão?')) return;
+  if (editKey === key) cancelEdit();
+  setSyncStatus('syncing', 'A apagar…');
+  remove(ref(db, 'sessions/' + key))
+    .then(() => { setSyncStatus('online', 'Sincronizado'); showToast('Sessão apagada'); })
+    .catch(() => setSyncStatus('error', 'Erro ao apagar'));
+};
+
+// ── Render ────────────────────────────────────────────────────
+function renderDashboard() {
+  const arr = Object.values(sessions).sort((a,b) => (a.ts||0)-(b.ts||0));
+
+  if (arr.length === 0) {
+    document.getElementById('d-saving').textContent = '—';
+    document.getElementById('d-sub').textContent = 'Adiciona a primeira sessão para começar.';
+    ['d-km','d-kwh','d-ev-cost','d-bmw-cost','d-kwh100','d-sessoes','d-pct','d-sav100']
+      .forEach(id => document.getElementById(id).textContent = '—');
+    updateChart([]);
+    return;
+  }
+
+  const totKm    = arr.reduce((a,s) => a + s.km, 0);
+  const totKwh   = arr.reduce((a,s) => a + s.kwh, 0);
+  const totEv    = arr.reduce((a,s) => a + s.evCost, 0);
+  const totBmw   = arr.reduce((a,s) => a + s.bmwCost, 0);
+  const totSaving= totBmw - totEv;
+  const avgKwh100= totKm > 0 ? (totKwh / totKm) * 100 : 0;
+  const avgPct   = arr.reduce((a,s) => a + (s.batStart - s.batEnd), 0) / arr.length;
+  const sav100   = totKm > 0 ? (totSaving / totKm) * 100 : 0;
+
+  const savEl = document.getElementById('d-saving');
+  savEl.textContent = (totSaving >= 0 ? '+' : '') + totSaving.toFixed(2) + ' €';
+  savEl.style.color = totSaving >= 0 ? 'var(--green)' : 'var(--red)';
+
+  document.getElementById('d-sub').innerHTML =
+    `${arr.length} sessão(ões) · ${Math.round(totKm)} km · ` +
+    `<span style="color:var(--green)">${totEv.toFixed(2)} € EV</span> vs ` +
+    `<span style="color:var(--amber)">${totBmw.toFixed(2)} € BMW</span>`;
+
+  document.getElementById('d-km').innerHTML       = Math.round(totKm) + '<span>km</span>';
+  document.getElementById('d-kwh').innerHTML      = totKwh.toFixed(1) + '<span>kWh</span>';
+  document.getElementById('d-ev-cost').innerHTML  = totEv.toFixed(2) + '<span>€</span>';
+  document.getElementById('d-bmw-cost').innerHTML = totBmw.toFixed(2) + '<span>€</span>';
+  document.getElementById('d-kwh100').innerHTML   = avgKwh100.toFixed(1) + '<span>kWh/100km</span>';
+  document.getElementById('d-sessoes').textContent= arr.length;
+  document.getElementById('d-pct').innerHTML      = avgPct.toFixed(1) + '<span>%</span>';
+  document.getElementById('d-sav100').innerHTML   = (sav100 >= 0 ? '+' : '') + sav100.toFixed(2) + '<span>€/100km</span>';
+
+  updateChart(arr);
+}
+
+function renderSessions() {
+  const list = document.getElementById('sessions-list');
+  const arr = Object.entries(sessions).sort((a,b) => (b[1].ts||0)-(a[1].ts||0));
+
+  if (arr.length === 0) {
+    list.innerHTML = '<div class="empty">Sem sessões registadas ainda.</div>';
+    return;
+  }
+
+  list.innerHTML = arr.map(([key, s]) => `
+    <div class="session-card">
+      <div class="session-info">
+        <div class="session-header">
+          <span class="session-date">${s.date}</span>
+          <span class="session-km">${s.km} km</span>
+          <span class="session-bat">${s.batStart}% → ${s.batEnd}%</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px">
+          ${s.kwh.toFixed(2)} kWh · ${s.kwh100.toFixed(1)} kWh/100km · gasóleo ${parseFloat(s.gasoleo||conf.gasoleo).toFixed(3)} €/L
+        </div>
+        <div class="session-badges">
+          <span class="badge badge-ev">⚡ ${s.evCost.toFixed(2)} €</span>
+          <span class="badge badge-gas">⛽ ${s.bmwCost.toFixed(2)} €</span>
+          <span class="badge ${s.saving >= 0 ? 'badge-save' : 'badge-loss'}">${s.saving >= 0 ? '↓ ' : '↑ '}${Math.abs(s.saving).toFixed(2)} € ${s.saving >= 0 ? 'poupado' : 'extra'}</span>
+        </div>
+      </div>
+      <div class="session-actions">
+        <button class="btn btn-icon btn-edit" onclick="editSession('${key}')" title="Editar">✎</button>
+        <button class="btn btn-icon" onclick="deleteSession('${key}')" title="Apagar">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function updateChart(arr) {
+  const canvas = document.getElementById('costChart');
+  if (chart) { chart.destroy(); chart = null; }
+  if (arr.length === 0) { canvas.textContent = 'Sem dados ainda.'; return; }
+  chart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: arr.map(s => s.date),
+      datasets: [
+        { label:'MG MGS5 EV', data:arr.map(s => parseFloat(s.evCost.toFixed(2))),  backgroundColor:'#1aad7a', borderRadius:5, borderSkipped:false },
+        { label:'BMW X3',     data:arr.map(s => parseFloat(s.bmwCost.toFixed(2))), backgroundColor:'#e8971a', borderRadius:5, borderSkipped:false }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} €` } } },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:'#5c5b65',font:{size:11},maxRotation:45}, border:{display:false} },
+        y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5b65',font:{size:11},callback:v=>v.toFixed(0)+'€'}, border:{display:false} }
+      }
+    }
+  });
+}
+
+function renderAll() { renderDashboard(); renderSessions(); }
+
+// ── UI helpers ────────────────────────────────────────────────
+window.switchTab = function(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['dashboard','registar','config'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  window.scrollTo(0,0);
+};
+
+function showError(msg) {
+  const el = document.getElementById('f-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div'); t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1aad7a;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:99px;transition:transform 0.25s,opacity 0.25s;opacity:0;z-index:9999;pointer-events:none;font-family:var(--font)';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)'; t.style.opacity = '1';
+  setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(60px)'; t.style.opacity = '0'; }, 2200);
+}
+</script>
+</body>
+</html>
