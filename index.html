@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
+:root{
   --bg:#0e0e10;--bg2:#18181c;--bg3:#222228;
   --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
   --text:#f0efea;--text2:#9998a0;--text3:#5c5b65;
@@ -19,6 +19,7 @@
   --amber:#e8971a;--amber-dim:rgba(232,151,26,0.12);
   --red:#e85a5a;--red-dim:rgba(232,90,90,0.1);
   --blue:#4a90e2;--blue-dim:rgba(74,144,226,0.12);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.12);
   --radius:14px;--radius-sm:9px;
   --font:'DM Sans',sans-serif;--font-display:'Fraunces',serif;
 }
@@ -37,8 +38,9 @@ header{padding:24px 0 16px;border-bottom:0.5px solid var(--border);margin-bottom
 .sync-dot.error{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-.tabs{display:flex;gap:4px;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:18px}
-.tab{flex:1;padding:8px;font-size:13px;font-family:var(--font);border:none;background:transparent;color:var(--text2);cursor:pointer;border-radius:9px;transition:all 0.18s;font-weight:400}
+/* ── Tabs — 5 tabs, smaller text on mobile ── */
+.tabs{display:flex;gap:3px;background:var(--bg2);border-radius:12px;padding:4px;margin-bottom:18px}
+.tab{flex:1;padding:7px 4px;font-size:12px;font-family:var(--font);border:none;background:transparent;color:var(--text2);cursor:pointer;border-radius:9px;transition:all 0.18s;font-weight:400;white-space:nowrap}
 .tab.active{background:var(--bg3);color:var(--text);font-weight:500}
 
 .panel{display:none}.panel.active{display:block}
@@ -48,15 +50,18 @@ header{padding:24px 0 16px;border-bottom:0.5px solid var(--border);margin-bottom
 
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .metrics-4{grid-template-columns:repeat(4,1fr)}
+.metrics-3{grid-template-columns:repeat(3,1fr)}
 .metric{background:var(--bg3);border-radius:var(--radius-sm);padding:12px}
 .metric-label{font-size:11px;color:var(--text3);margin-bottom:5px}
 .metric-val{font-size:20px;font-weight:500;color:var(--text);line-height:1}
 .metric-val span{font-size:11px;font-weight:400;color:var(--text2);margin-left:2px}
+.metric-val.green{color:var(--green)}
+.metric-val.red{color:var(--red)}
 
 .savings-hero{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
 .savings-num{font-family:var(--font-display);font-size:38px;font-weight:600;color:var(--green);letter-spacing:-1px;line-height:1}
 .savings-lbl{font-size:13px;color:var(--text2)}
-.savings-sub{font-size:12px;color:var(--text3);flex-wrap:wrap}
+.savings-sub{font-size:12px;color:var(--text3)}
 
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .form-group{display:flex;flex-direction:column;gap:6px}
@@ -74,11 +79,9 @@ select option{background:var(--bg3)}
 .btn:active{transform:scale(0.97)}
 .btn-primary{background:var(--green);color:#000;border-color:transparent;font-weight:600;width:100%;padding:12px;font-size:15px}
 .btn-primary:hover{background:#1ec98d}
-.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
 .btn-icon{padding:7px 9px;border-radius:8px;font-size:13px;color:var(--text3);border-color:transparent}
 .btn-icon:hover{background:var(--red-dim);color:var(--red)}
-.btn-edit{color:var(--text3)}
-.btn-edit:hover{background:var(--blue-dim);color:var(--blue)}
+.btn-edit:hover{background:var(--blue-dim)!important;color:var(--blue)!important}
 
 .price-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .price-row:last-child{margin-bottom:0}
@@ -92,12 +95,14 @@ select option{background:var(--bg3)}
 .session-info{flex:1;min-width:0}
 .session-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
 .session-date{font-size:12px;color:var(--text3)}
-.session-km{font-size:13px;font-weight:500;color:var(--text)}
+.session-km{font-size:13px;font-weight:500}
 .session-bat{font-size:12px;color:var(--text2)}
 .session-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
 .badge{font-size:11px;padding:3px 9px;border-radius:99px;white-space:nowrap}
 .badge-ev{background:var(--green-dim);color:var(--green)}
 .badge-gas{background:var(--amber-dim);color:var(--amber)}
+.badge-mg{background:var(--green-dim);color:var(--green)}
+.badge-bmw{background:var(--amber-dim);color:var(--amber)}
 .badge-save{background:rgba(26,173,122,0.08);color:var(--green);border:0.5px solid rgba(26,173,122,0.2)}
 .badge-loss{background:var(--red-dim);color:var(--red);border:0.5px solid rgba(232,90,90,0.2)}
 .session-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
@@ -112,6 +117,31 @@ select option{background:var(--bg3)}
 .form-note{font-size:12px;color:var(--text3);margin-top:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm);border-left:2px solid var(--green)}
 .edit-banner{background:var(--blue-dim);border:0.5px solid rgba(74,144,226,0.25);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--blue);display:none}
 
+/* ── Annual panel ── */
+.year-selector{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.year-selector select{flex:1}
+.year-bar{display:flex;gap:0;border-radius:var(--radius-sm);overflow:hidden;height:10px;margin:8px 0 4px}
+.year-bar-seg{height:100%;transition:width 0.4s}
+.bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:12px}
+.cost-compare-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cost-col{background:var(--bg3);border-radius:var(--radius-sm);padding:14px}
+.cost-col-label{font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em}
+.cost-col-total{font-family:var(--font-display);font-size:28px;font-weight:600;line-height:1;margin-bottom:8px}
+.cost-col-total.mg{color:var(--green)}
+.cost-col-total.bmw{color:var(--amber)}
+.cost-breakdown{display:flex;flex-direction:column;gap:4px}
+.cost-line{display:flex;justify-content:space-between;font-size:12px;color:var(--text2)}
+.cost-line strong{color:var(--text);font-weight:500}
+.annual-saving-hero{background:linear-gradient(135deg,rgba(26,173,122,0.1),rgba(26,173,122,0.04));border:0.5px solid rgba(26,173,122,0.2);border-radius:var(--radius-sm);padding:16px;margin-bottom:12px;text-align:center}
+.annual-saving-num{font-family:var(--font-display);font-size:42px;font-weight:600;color:var(--green);letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.annual-saving-lbl{font-size:13px;color:var(--text2)}
+
+/* ── Despesas ── */
+.desp-type-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.type-btn{padding:10px 6px;font-size:12px;font-family:var(--font);border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;text-align:center;transition:all 0.15s;line-height:1.3}
+.type-btn.active{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.type-btn:hover{background:var(--bg2)}
+
 .loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:999;transition:opacity 0.4s}
 .loading-overlay.hidden{opacity:0;pointer-events:none}
 .loading-spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 0.8s linear infinite}
@@ -122,10 +152,13 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
 
 @media(max-width:480px){
   .metrics-4{grid-template-columns:1fr 1fr}
+  .metrics-3{grid-template-columns:1fr 1fr}
   .metric-val{font-size:17px}
-  .savings-num{font-size:30px}
+  .savings-num,.annual-saving-num{font-size:30px}
   .price-row{flex-wrap:wrap}
   .price-row input{width:80px}
+  .cost-col-total{font-size:22px}
+  .tab{font-size:11px;padding:7px 2px}
 }
 </style>
 </head>
@@ -151,27 +184,27 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
   <div class="tabs">
     <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
     <button class="tab" onclick="switchTab('registar')">Registar</button>
-    <button class="tab" onclick="switchTab('config')">Configurar</button>
+    <button class="tab" onclick="switchTab('despesas')">Despesas</button>
+    <button class="tab" onclick="switchTab('anual')">Anual</button>
+    <button class="tab" onclick="switchTab('config')">Config</button>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- ═══════════════ DASHBOARD ═══════════════ -->
   <div id="panel-dashboard" class="panel active">
     <div class="card">
-      <div class="card-title">Poupança acumulada vs BMW X3</div>
+      <div class="card-title">Poupança acumulada vs BMW X3 — combustível</div>
       <div class="savings-hero">
         <div class="savings-num" id="d-saving">—</div>
         <div class="savings-lbl">poupados</div>
       </div>
       <div class="savings-sub" id="d-sub">A carregar dados…</div>
     </div>
-
     <div class="metrics metrics-4">
       <div class="metric"><div class="metric-label">Km totais</div><div class="metric-val" id="d-km">—</div></div>
       <div class="metric"><div class="metric-label">kWh consumidos</div><div class="metric-val" id="d-kwh">—</div></div>
       <div class="metric"><div class="metric-label">Custo EV</div><div class="metric-val" id="d-ev-cost">—</div></div>
       <div class="metric"><div class="metric-label">Custo BMW equiv.</div><div class="metric-val" id="d-bmw-cost">—</div></div>
     </div>
-
     <div class="card">
       <div class="card-title">Custo por sessão</div>
       <div class="chart-legend">
@@ -179,13 +212,12 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
         <span><span class="legend-dot" style="background:#e8971a"></span>BMW X3 equivalente</span>
       </div>
       <div class="chart-wrap">
-        <canvas id="costChart" role="img" aria-label="Gráfico de custo por sessão EV vs BMW">Sem dados ainda.</canvas>
+        <canvas id="costChart" role="img" aria-label="Custo por sessão EV vs BMW">Sem dados ainda.</canvas>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">Eficiência média</div>
-      <div class="metrics">
+      <div class="metrics metrics-4">
         <div class="metric"><div class="metric-label">kWh / 100 km</div><div class="metric-val" id="d-kwh100">—</div></div>
         <div class="metric"><div class="metric-label">Sessões</div><div class="metric-val" id="d-sessoes">—</div></div>
         <div class="metric"><div class="metric-label">% bat. / sessão</div><div class="metric-val" id="d-pct">—</div></div>
@@ -194,7 +226,7 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
     </div>
   </div>
 
-  <!-- REGISTAR -->
+  <!-- ═══════════════ REGISTAR ═══════════════ -->
   <div id="panel-registar" class="panel">
     <div class="card">
       <div class="edit-banner" id="edit-banner">A editar sessão — confirma os valores e guarda.</div>
@@ -221,7 +253,6 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
           <input type="number" id="f-km-rest" placeholder="110" min="0">
         </div>
       </div>
-
       <div class="divider"></div>
       <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">Preços nesta sessão</div>
       <div class="form-grid">
@@ -241,20 +272,107 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
       <p class="form-note">Pré-preenchido com a configuração atual. Ajusta se o preço do gasóleo mudou esta semana.</p>
       <p class="error-msg" id="f-error"></p>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn-primary btn" id="btn-submit" onclick="submitSession()">+ Adicionar sessão</button>
+        <button class="btn btn-primary" id="btn-submit" onclick="submitSession()">+ Adicionar sessão</button>
         <button class="btn" id="btn-cancel" onclick="cancelEdit()" style="display:none;width:auto;padding:12px 16px">Cancelar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Histórico de sessões</div>
+      <div class="sessions-list" id="sessions-list"><div class="empty">A carregar…</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DESPESAS ═══════════════ -->
+  <div id="panel-despesas" class="panel">
+    <div class="card">
+      <div class="card-title">Registar despesa</div>
+      <div class="desp-type-selector">
+        <button class="type-btn active" id="dtype-iuc"     onclick="selectDespType('iuc')">🏷️ IUC</button>
+        <button class="type-btn"        id="dtype-revisao" onclick="selectDespType('revisao')">🔧 Revisão /<br>Manutenção</button>
+        <button class="type-btn"        id="dtype-inspecao" onclick="selectDespType('inspecao')">📋 Inspeção</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data</label>
+          <input type="text" id="d-date" placeholder="ex: Jan 2025">
+        </div>
+        <div class="form-group">
+          <label>Veículo</label>
+          <select id="d-veiculo">
+            <option value="mg">MG MGS5 EV</option>
+            <option value="bmw">BMW X3 (referência)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valor (€)</label>
+          <input type="number" id="d-valor" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Descrição (opcional)</label>
+          <input type="text" id="d-descricao" placeholder="ex: Revisão 30.000km">
+        </div>
+      </div>
+      <p class="error-msg" id="d-error"></p>
+      <button class="btn btn-primary" onclick="submitDespesa()" style="margin-top:10px">+ Adicionar despesa</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Histórico de despesas</div>
+      <div class="sessions-list" id="despesas-list"><div class="empty">A carregar…</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ANUAL ═══════════════ -->
+  <div id="panel-anual" class="panel">
+    <div class="card" style="padding-bottom:12px">
+      <div class="card-title">Ano em análise</div>
+      <div class="year-selector">
+        <select id="year-sel" onchange="renderAnual()"></select>
+      </div>
+    </div>
+
+    <div class="annual-saving-hero">
+      <div class="annual-saving-num" id="a-total-saving">—</div>
+      <div class="annual-saving-lbl" id="a-total-lbl">poupança total estimada este ano (combustível + despesas)</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Custo total do ano — MG vs BMW</div>
+      <div class="cost-compare-row">
+        <div class="cost-col">
+          <div class="cost-col-label">⚡ MG MGS5 EV</div>
+          <div class="cost-col-total mg" id="a-mg-total">—</div>
+          <div class="cost-breakdown" id="a-mg-breakdown"></div>
+        </div>
+        <div class="cost-col">
+          <div class="cost-col-label">⛽ BMW X3</div>
+          <div class="cost-col-total bmw" id="a-bmw-total">—</div>
+          <div class="cost-breakdown" id="a-bmw-breakdown"></div>
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">Histórico</div>
-      <div class="sessions-list" id="sessions-list">
-        <div class="empty">A carregar…</div>
+      <div class="card-title">Distribuição de custos MG</div>
+      <div class="chart-wrap" style="height:180px">
+        <canvas id="annualChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Detalhe por categoria</div>
+      <div class="metrics metrics-3">
+        <div class="metric"><div class="metric-label">Combustível / Energia</div><div class="metric-val green" id="a-energia">—</div></div>
+        <div class="metric"><div class="metric-label">IUC</div><div class="metric-val" id="a-iuc">—</div></div>
+        <div class="metric"><div class="metric-label">Revisões / Manutenção</div><div class="metric-val" id="a-revisao">—</div></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Inspeções</div><div class="metric-val" id="a-inspecao">—</div></div>
+        <div class="metric"><div class="metric-label">Km registados (ano)</div><div class="metric-val" id="a-km">—</div></div>
       </div>
     </div>
   </div>
 
-  <!-- CONFIG -->
+  <!-- ═══════════════ CONFIG ═══════════════ -->
   <div id="panel-config" class="panel">
     <div class="card">
       <div class="card-title">Tarifas de eletricidade</div>
@@ -276,7 +394,6 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
         </select>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">Referência BMW X3</div>
       <div class="price-row">
@@ -288,7 +405,6 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
         <input type="number" id="c-cons-bmw" step="0.1" min="0">
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">Veículo elétrico</div>
       <div class="price-row">
@@ -297,7 +413,6 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
       </div>
       <p style="font-size:12px;color:var(--text3);margin-top:8px">MG MGS5 EV — bateria CATL LFP 64,9 kWh bruta</p>
     </div>
-
     <button class="btn btn-primary" onclick="saveConfig()">Guardar configuração</button>
   </div>
 
@@ -318,220 +433,224 @@ const firebaseConfig = {
   appId: "1:977408236396:web:ef57a56b69cdb1673fb149"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
 
 const DEFAULT_CONF = { vazia:0.094, cheia:0.182, tarifa:'vazia', gasoleo:1.63, consBmw:7.5, batCap:64.9 };
+const DESP_LABELS = { iuc:'IUC', revisao:'Revisão / Manutenção', inspecao:'Inspeção' };
+const DESP_ICONS  = { iuc:'🏷️', revisao:'🔧', inspecao:'📋' };
 
-let sessions = {};
-let conf = { ...DEFAULT_CONF };
-let editKey = null;
-let chart = null;
-let dbReady = false;
+let sessions  = {};
+let despesas  = {};
+let conf      = { ...DEFAULT_CONF };
+let editKey   = null;
+let despType  = 'iuc';
+let chart     = null;
+let annualChart = null;
+let loadedSessions = false;
+let loadedDespesas = false;
 
-// ── Sync status ──────────────────────────────────────────────
-function setSyncStatus(state, label) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  dot.className = 'sync-dot ' + state;
-  lbl.textContent = label;
+// ── Sync ─────────────────────────────────────────────────────
+function setSyncStatus(state, lbl) {
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-label').textContent = lbl;
+}
+function checkReady() {
+  if (loadedSessions && loadedDespesas) {
+    document.getElementById('loading').classList.add('hidden');
+    setSyncStatus('online', 'Sincronizado');
+    renderAll();
+  }
 }
 
 // ── Firebase listeners ────────────────────────────────────────
-onValue(ref(db, 'conf'), snap => {
-  conf = { ...DEFAULT_CONF, ...(snap.val() || {}) };
+onValue(ref(db,'conf'), snap => {
+  conf = { ...DEFAULT_CONF, ...(snap.val()||{}) };
   loadConfToForm();
   prefillSessionPrices();
-}, err => setSyncStatus('error', 'Erro de ligação'));
-
-onValue(ref(db, 'sessions'), snap => {
-  sessions = snap.val() || {};
-  dbReady = true;
-  document.getElementById('loading').classList.add('hidden');
-  setSyncStatus('online', 'Sincronizado');
-  renderAll();
-}, err => {
-  setSyncStatus('error', 'Erro de ligação');
-  document.getElementById('loading').classList.add('hidden');
 });
+onValue(ref(db,'sessions'), snap => {
+  sessions = snap.val()||{};
+  loadedSessions = true;
+  checkReady();
+}, () => { setSyncStatus('error','Erro de ligação'); document.getElementById('loading').classList.add('hidden'); });
+onValue(ref(db,'despesas'), snap => {
+  despesas = snap.val()||{};
+  loadedDespesas = true;
+  checkReady();
+}, () => { loadedDespesas = true; checkReady(); });
 
 // ── Config ────────────────────────────────────────────────────
 function loadConfToForm() {
-  document.getElementById('c-vazia').value = conf.vazia;
-  document.getElementById('c-cheia').value = conf.cheia;
-  document.getElementById('c-tarifa').value = conf.tarifa;
+  document.getElementById('c-vazia').value   = conf.vazia;
+  document.getElementById('c-cheia').value   = conf.cheia;
+  document.getElementById('c-tarifa').value  = conf.tarifa;
   document.getElementById('c-gasoleo').value = conf.gasoleo;
-  document.getElementById('c-cons-bmw').value = conf.consBmw;
+  document.getElementById('c-cons-bmw').value= conf.consBmw;
   document.getElementById('c-bat-cap').value = conf.batCap;
 }
-
 function prefillSessionPrices() {
   if (!document.getElementById('f-gasoleo').dataset.edited)
     document.getElementById('f-gasoleo').value = conf.gasoleo;
   if (!document.getElementById('f-tarifa').dataset.edited)
     document.getElementById('f-tarifa').value = conf.tarifa;
 }
-
 window.saveConfig = function() {
-  const newConf = {
-    vazia:  parseFloat(document.getElementById('c-vazia').value)    || DEFAULT_CONF.vazia,
-    cheia:  parseFloat(document.getElementById('c-cheia').value)    || DEFAULT_CONF.cheia,
-    tarifa: document.getElementById('c-tarifa').value,
-    gasoleo:parseFloat(document.getElementById('c-gasoleo').value)  || DEFAULT_CONF.gasoleo,
-    consBmw:parseFloat(document.getElementById('c-cons-bmw').value) || DEFAULT_CONF.consBmw,
-    batCap: parseFloat(document.getElementById('c-bat-cap').value)  || DEFAULT_CONF.batCap
+  const nc = {
+    vazia:   parseFloat(document.getElementById('c-vazia').value)    || DEFAULT_CONF.vazia,
+    cheia:   parseFloat(document.getElementById('c-cheia').value)    || DEFAULT_CONF.cheia,
+    tarifa:  document.getElementById('c-tarifa').value,
+    gasoleo: parseFloat(document.getElementById('c-gasoleo').value)  || DEFAULT_CONF.gasoleo,
+    consBmw: parseFloat(document.getElementById('c-cons-bmw').value) || DEFAULT_CONF.consBmw,
+    batCap:  parseFloat(document.getElementById('c-bat-cap').value)  || DEFAULT_CONF.batCap
   };
-  setSyncStatus('syncing', 'A guardar…');
-  set(ref(db, 'conf'), newConf)
-    .then(() => { setSyncStatus('online', 'Sincronizado'); showToast('Configuração guardada'); })
-    .catch(() => setSyncStatus('error', 'Erro ao guardar'));
+  setSyncStatus('syncing','A guardar…');
+  set(ref(db,'conf'), nc)
+    .then(()=>{ setSyncStatus('online','Sincronizado'); showToast('Configuração guardada'); })
+    .catch(()=> setSyncStatus('error','Erro ao guardar'));
 };
 
-// ── Session helpers ───────────────────────────────────────────
-function getTarifaValue(key) {
-  if (key === 'vazia') return conf.vazia;
-  if (key === 'cheia') return conf.cheia;
-  return (conf.vazia + conf.cheia) / 2;
+// ── Sessions ──────────────────────────────────────────────────
+function getTarifaVal(key) {
+  if (key==='vazia') return conf.vazia;
+  if (key==='cheia') return conf.cheia;
+  return (conf.vazia+conf.cheia)/2;
 }
-
-function buildRecord(date, km, batStart, batEnd, kmRest, gasoleo, tarifaKey) {
-  const kwh = ((batStart - batEnd) / 100) * conf.batCap;
-  const tarifaVal = getTarifaValue(tarifaKey);
-  const evCost  = kwh * tarifaVal;
-  const bmwCost = (km / 100) * conf.consBmw * gasoleo;
-  return {
-    date, km, batStart, batEnd, kmRest: kmRest || 0,
-    gasoleo, tarifaKey, kwh,
-    evCost, bmwCost,
-    saving: bmwCost - evCost,
-    kwh100: km > 0 ? (kwh / km) * 100 : 0,
-    ts: Date.now()
-  };
+function buildRecord(date,km,batStart,batEnd,kmRest,gasoleo,tarifaKey) {
+  const kwh     = ((batStart-batEnd)/100)*conf.batCap;
+  const evCost  = kwh*getTarifaVal(tarifaKey);
+  const bmwCost = (km/100)*conf.consBmw*gasoleo;
+  return { date,km,batStart,batEnd,kmRest:kmRest||0,gasoleo,tarifaKey,kwh,
+    evCost,bmwCost,saving:bmwCost-evCost,kwh100:km>0?(kwh/km)*100:0,ts:Date.now() };
 }
-
-// ── Submit / Edit ─────────────────────────────────────────────
 window.submitSession = function() {
   const date     = document.getElementById('f-date').value.trim();
   const km       = parseFloat(document.getElementById('f-km').value);
   const batStart = parseFloat(document.getElementById('f-bat-start').value);
   const batEnd   = parseFloat(document.getElementById('f-bat-end').value);
-  const kmRest   = parseFloat(document.getElementById('f-km-rest').value) || 0;
-  const gasoleo  = parseFloat(document.getElementById('f-gasoleo').value) || conf.gasoleo;
+  const kmRest   = parseFloat(document.getElementById('f-km-rest').value)||0;
+  const gasoleo  = parseFloat(document.getElementById('f-gasoleo').value)||conf.gasoleo;
   const tarifaKey= document.getElementById('f-tarifa').value;
-
-  if (!date || isNaN(km) || km <= 0) { showError('Preenche a data e os km percorridos.'); return; }
-  if (isNaN(batStart) || isNaN(batEnd)) { showError('Preenche as percentagens de bateria.'); return; }
-  if (batEnd >= batStart) { showError('A bateria no fim deve ser inferior ao início.'); return; }
-  document.getElementById('f-error').style.display = 'none';
-
-  const record = buildRecord(date, km, batStart, batEnd, kmRest, gasoleo, tarifaKey);
-  setSyncStatus('syncing', 'A guardar…');
-
-  const promise = editKey
-    ? update(ref(db, 'sessions/' + editKey), record)
-    : push(ref(db, 'sessions'), record);
-
-  promise
-    .then(() => {
-      setSyncStatus('online', 'Sincronizado');
-      showToast(editKey ? 'Sessão atualizada!' : 'Sessão adicionada!');
-      cancelEdit();
-      if (!editKey) switchTab('dashboard');
-    })
-    .catch(() => setSyncStatus('error', 'Erro ao guardar'));
+  if (!date||isNaN(km)||km<=0){ showError('f-error','Preenche a data e os km percorridos.'); return; }
+  if (isNaN(batStart)||isNaN(batEnd)){ showError('f-error','Preenche as percentagens de bateria.'); return; }
+  if (batEnd>=batStart){ showError('f-error','A bateria no fim deve ser inferior ao início.'); return; }
+  document.getElementById('f-error').style.display='none';
+  const record = buildRecord(date,km,batStart,batEnd,kmRest,gasoleo,tarifaKey);
+  setSyncStatus('syncing','A guardar…');
+  const p = editKey ? update(ref(db,'sessions/'+editKey),record) : push(ref(db,'sessions'),record);
+  p.then(()=>{ setSyncStatus('online','Sincronizado'); showToast(editKey?'Sessão atualizada!':'Sessão adicionada!'); cancelEdit(); if(!editKey) switchTab('dashboard'); })
+   .catch(()=> setSyncStatus('error','Erro ao guardar'));
 };
-
 window.editSession = function(key) {
-  const s = sessions[key];
-  editKey = key;
-  document.getElementById('f-date').value     = s.date;
-  document.getElementById('f-km').value       = s.km;
-  document.getElementById('f-bat-start').value= s.batStart;
-  document.getElementById('f-bat-end').value  = s.batEnd;
-  document.getElementById('f-km-rest').value  = s.kmRest || '';
-  document.getElementById('f-gasoleo').value  = s.gasoleo || conf.gasoleo;
-  document.getElementById('f-tarifa').value   = s.tarifaKey || conf.tarifa;
-  document.getElementById('edit-banner').style.display = 'block';
-  document.getElementById('form-title').textContent    = 'Editar sessão';
-  document.getElementById('btn-submit').textContent    = '✓ Guardar alterações';
-  document.getElementById('btn-cancel').style.display  = 'block';
-  switchTab('registar');
-  window.scrollTo(0, 0);
+  const s=sessions[key]; editKey=key;
+  document.getElementById('f-date').value     =s.date;
+  document.getElementById('f-km').value       =s.km;
+  document.getElementById('f-bat-start').value=s.batStart;
+  document.getElementById('f-bat-end').value  =s.batEnd;
+  document.getElementById('f-km-rest').value  =s.kmRest||'';
+  document.getElementById('f-gasoleo').value  =s.gasoleo||conf.gasoleo;
+  document.getElementById('f-tarifa').value   =s.tarifaKey||conf.tarifa;
+  document.getElementById('edit-banner').style.display='block';
+  document.getElementById('form-title').textContent='Editar sessão';
+  document.getElementById('btn-submit').textContent='✓ Guardar alterações';
+  document.getElementById('btn-cancel').style.display='block';
+  switchTab('registar'); window.scrollTo(0,0);
 };
-
 window.cancelEdit = function() {
-  editKey = null;
-  ['f-date','f-km','f-bat-start','f-bat-end','f-km-rest'].forEach(id => document.getElementById(id).value = '');
+  editKey=null;
+  ['f-date','f-km','f-bat-start','f-bat-end','f-km-rest'].forEach(id=>document.getElementById(id).value='');
   prefillSessionPrices();
-  document.getElementById('edit-banner').style.display = 'none';
-  document.getElementById('form-title').textContent    = 'Nova sessão de utilização';
-  document.getElementById('btn-submit').textContent    = '+ Adicionar sessão';
-  document.getElementById('btn-cancel').style.display  = 'none';
-  document.getElementById('f-error').style.display     = 'none';
+  document.getElementById('edit-banner').style.display='none';
+  document.getElementById('form-title').textContent='Nova sessão de utilização';
+  document.getElementById('btn-submit').textContent='+ Adicionar sessão';
+  document.getElementById('btn-cancel').style.display='none';
+  document.getElementById('f-error').style.display='none';
+};
+window.deleteSession = function(key) {
+  if(!confirm('Apagar esta sessão?')) return;
+  if(editKey===key) cancelEdit();
+  setSyncStatus('syncing','A apagar…');
+  remove(ref(db,'sessions/'+key))
+    .then(()=>{ setSyncStatus('online','Sincronizado'); showToast('Sessão apagada'); })
+    .catch(()=> setSyncStatus('error','Erro ao apagar'));
 };
 
-window.deleteSession = function(key) {
-  if (!confirm('Apagar esta sessão?')) return;
-  if (editKey === key) cancelEdit();
-  setSyncStatus('syncing', 'A apagar…');
-  remove(ref(db, 'sessions/' + key))
-    .then(() => { setSyncStatus('online', 'Sincronizado'); showToast('Sessão apagada'); })
-    .catch(() => setSyncStatus('error', 'Erro ao apagar'));
+// ── Despesas ──────────────────────────────────────────────────
+window.selectDespType = function(type) {
+  despType = type;
+  ['iuc','revisao','inspecao'].forEach(t => {
+    document.getElementById('dtype-'+t).classList.toggle('active', t===type);
+  });
+};
+window.submitDespesa = function() {
+  const date     = document.getElementById('d-date').value.trim();
+  const veiculo  = document.getElementById('d-veiculo').value;
+  const valor    = parseFloat(document.getElementById('d-valor').value);
+  const descricao= document.getElementById('d-descricao').value.trim();
+  if(!date){ showError('d-error','Preenche a data.'); return; }
+  if(isNaN(valor)||valor<=0){ showError('d-error','Indica um valor válido.'); return; }
+  document.getElementById('d-error').style.display='none';
+  const record = { date, veiculo, tipo: despType, valor, descricao, ts: Date.now() };
+  setSyncStatus('syncing','A guardar…');
+  push(ref(db,'despesas'), record)
+    .then(()=>{
+      setSyncStatus('online','Sincronizado');
+      showToast('Despesa adicionada!');
+      document.getElementById('d-date').value='';
+      document.getElementById('d-valor').value='';
+      document.getElementById('d-descricao').value='';
+    })
+    .catch(()=> setSyncStatus('error','Erro ao guardar'));
+};
+window.deleteDespesa = function(key) {
+  if(!confirm('Apagar esta despesa?')) return;
+  setSyncStatus('syncing','A apagar…');
+  remove(ref(db,'despesas/'+key))
+    .then(()=>{ setSyncStatus('online','Sincronizado'); showToast('Despesa apagada'); })
+    .catch(()=> setSyncStatus('error','Erro ao apagar'));
 };
 
 // ── Render ────────────────────────────────────────────────────
 function renderDashboard() {
-  const arr = Object.values(sessions).sort((a,b) => (a.ts||0)-(b.ts||0));
-
-  if (arr.length === 0) {
-    document.getElementById('d-saving').textContent = '—';
-    document.getElementById('d-sub').textContent = 'Adiciona a primeira sessão para começar.';
+  const arr = Object.values(sessions).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  if(arr.length===0){
+    document.getElementById('d-saving').textContent='—';
+    document.getElementById('d-sub').textContent='Adiciona a primeira sessão para começar.';
     ['d-km','d-kwh','d-ev-cost','d-bmw-cost','d-kwh100','d-sessoes','d-pct','d-sav100']
-      .forEach(id => document.getElementById(id).textContent = '—');
-    updateChart([]);
-    return;
+      .forEach(id=>document.getElementById(id).textContent='—');
+    updateChart([]); return;
   }
-
-  const totKm    = arr.reduce((a,s) => a + s.km, 0);
-  const totKwh   = arr.reduce((a,s) => a + s.kwh, 0);
-  const totEv    = arr.reduce((a,s) => a + s.evCost, 0);
-  const totBmw   = arr.reduce((a,s) => a + s.bmwCost, 0);
-  const totSaving= totBmw - totEv;
-  const avgKwh100= totKm > 0 ? (totKwh / totKm) * 100 : 0;
-  const avgPct   = arr.reduce((a,s) => a + (s.batStart - s.batEnd), 0) / arr.length;
-  const sav100   = totKm > 0 ? (totSaving / totKm) * 100 : 0;
-
-  const savEl = document.getElementById('d-saving');
-  savEl.textContent = (totSaving >= 0 ? '+' : '') + totSaving.toFixed(2) + ' €';
-  savEl.style.color = totSaving >= 0 ? 'var(--green)' : 'var(--red)';
-
-  document.getElementById('d-sub').innerHTML =
-    `${arr.length} sessão(ões) · ${Math.round(totKm)} km · ` +
-    `<span style="color:var(--green)">${totEv.toFixed(2)} € EV</span> vs ` +
+  const totKm=arr.reduce((a,s)=>a+s.km,0);
+  const totKwh=arr.reduce((a,s)=>a+s.kwh,0);
+  const totEv=arr.reduce((a,s)=>a+s.evCost,0);
+  const totBmw=arr.reduce((a,s)=>a+s.bmwCost,0);
+  const totSaving=totBmw-totEv;
+  const avgKwh100=totKm>0?(totKwh/totKm)*100:0;
+  const avgPct=arr.reduce((a,s)=>a+(s.batStart-s.batEnd),0)/arr.length;
+  const sav100=totKm>0?(totSaving/totKm)*100:0;
+  const savEl=document.getElementById('d-saving');
+  savEl.textContent=(totSaving>=0?'+':'')+totSaving.toFixed(2)+' €';
+  savEl.style.color=totSaving>=0?'var(--green)':'var(--red)';
+  document.getElementById('d-sub').innerHTML=
+    `${arr.length} sessão(ões) · ${Math.round(totKm)} km · `+
+    `<span style="color:var(--green)">${totEv.toFixed(2)} € EV</span> vs `+
     `<span style="color:var(--amber)">${totBmw.toFixed(2)} € BMW</span>`;
-
-  document.getElementById('d-km').innerHTML       = Math.round(totKm) + '<span>km</span>';
-  document.getElementById('d-kwh').innerHTML      = totKwh.toFixed(1) + '<span>kWh</span>';
-  document.getElementById('d-ev-cost').innerHTML  = totEv.toFixed(2) + '<span>€</span>';
-  document.getElementById('d-bmw-cost').innerHTML = totBmw.toFixed(2) + '<span>€</span>';
-  document.getElementById('d-kwh100').innerHTML   = avgKwh100.toFixed(1) + '<span>kWh/100km</span>';
-  document.getElementById('d-sessoes').textContent= arr.length;
-  document.getElementById('d-pct').innerHTML      = avgPct.toFixed(1) + '<span>%</span>';
-  document.getElementById('d-sav100').innerHTML   = (sav100 >= 0 ? '+' : '') + sav100.toFixed(2) + '<span>€/100km</span>';
-
+  document.getElementById('d-km').innerHTML=Math.round(totKm)+'<span>km</span>';
+  document.getElementById('d-kwh').innerHTML=totKwh.toFixed(1)+'<span>kWh</span>';
+  document.getElementById('d-ev-cost').innerHTML=totEv.toFixed(2)+'<span>€</span>';
+  document.getElementById('d-bmw-cost').innerHTML=totBmw.toFixed(2)+'<span>€</span>';
+  document.getElementById('d-kwh100').innerHTML=avgKwh100.toFixed(1)+'<span>kWh/100km</span>';
+  document.getElementById('d-sessoes').textContent=arr.length;
+  document.getElementById('d-pct').innerHTML=avgPct.toFixed(1)+'<span>%</span>';
+  document.getElementById('d-sav100').innerHTML=(sav100>=0?'+':'')+sav100.toFixed(2)+'<span>€/100km</span>';
   updateChart(arr);
 }
 
 function renderSessions() {
-  const list = document.getElementById('sessions-list');
-  const arr = Object.entries(sessions).sort((a,b) => (b[1].ts||0)-(a[1].ts||0));
-
-  if (arr.length === 0) {
-    list.innerHTML = '<div class="empty">Sem sessões registadas ainda.</div>';
-    return;
-  }
-
-  list.innerHTML = arr.map(([key, s]) => `
+  const list=document.getElementById('sessions-list');
+  const arr=Object.entries(sessions).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+  if(arr.length===0){ list.innerHTML='<div class="empty">Sem sessões registadas ainda.</div>'; return; }
+  list.innerHTML=arr.map(([key,s])=>`
     <div class="session-card">
       <div class="session-info">
         <div class="session-header">
@@ -545,7 +664,7 @@ function renderSessions() {
         <div class="session-badges">
           <span class="badge badge-ev">⚡ ${s.evCost.toFixed(2)} €</span>
           <span class="badge badge-gas">⛽ ${s.bmwCost.toFixed(2)} €</span>
-          <span class="badge ${s.saving >= 0 ? 'badge-save' : 'badge-loss'}">${s.saving >= 0 ? '↓ ' : '↑ '}${Math.abs(s.saving).toFixed(2)} € ${s.saving >= 0 ? 'poupado' : 'extra'}</span>
+          <span class="badge ${s.saving>=0?'badge-save':'badge-loss'}">${s.saving>=0?'↓ ':'↑ '}${Math.abs(s.saving).toFixed(2)} € ${s.saving>=0?'poupado':'extra'}</span>
         </div>
       </div>
       <div class="session-actions">
@@ -555,22 +674,151 @@ function renderSessions() {
     </div>`).join('');
 }
 
+function renderDespesas() {
+  const list=document.getElementById('despesas-list');
+  const arr=Object.entries(despesas).sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+  if(arr.length===0){ list.innerHTML='<div class="empty">Sem despesas registadas ainda.</div>'; return; }
+  list.innerHTML=arr.map(([key,d])=>`
+    <div class="session-card">
+      <div class="session-info">
+        <div class="session-header">
+          <span class="session-date">${d.date}</span>
+          <span class="session-km">${DESP_ICONS[d.tipo]||'•'} ${DESP_LABELS[d.tipo]||d.tipo}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:5px">${d.descricao||'—'}</div>
+        <div class="session-badges">
+          <span class="badge ${d.veiculo==='mg'?'badge-mg':'badge-bmw'}">${d.veiculo==='mg'?'⚡ MG MGS5':'⛽ BMW X3'}</span>
+          <span class="badge badge-save">${d.valor.toFixed(2)} €</span>
+        </div>
+      </div>
+      <button class="btn btn-icon" onclick="deleteDespesa('${key}')" title="Apagar">✕</button>
+    </div>`).join('');
+}
+
+// ── Anual ─────────────────────────────────────────────────────
+function buildYearSelector() {
+  const sel = document.getElementById('year-sel');
+  const years = new Set();
+  const curYear = new Date().getFullYear();
+  years.add(curYear);
+  Object.values(sessions).forEach(s => { if(s.ts) years.add(new Date(s.ts).getFullYear()); });
+  Object.values(despesas).forEach(d => { if(d.ts) years.add(new Date(d.ts).getFullYear()); });
+  const sorted = [...years].sort((a,b)=>b-a);
+  const prev = sel.value;
+  sel.innerHTML = sorted.map(y=>`<option value="${y}">${y}</option>`).join('');
+  if(prev && years.has(parseInt(prev))) sel.value = prev;
+}
+
+window.renderAnual = function() {
+  buildYearSelector();
+  const year = parseInt(document.getElementById('year-sel').value);
+
+  // sessions this year
+  const sesArr = Object.values(sessions).filter(s => s.ts && new Date(s.ts).getFullYear()===year);
+  const mgEnergia  = sesArr.reduce((a,s)=>a+s.evCost,0);
+  const bmwCombust = sesArr.reduce((a,s)=>a+s.bmwCost,0);
+  const totKm      = sesArr.reduce((a,s)=>a+s.km,0);
+
+  // despesas this year
+  const despArr = Object.values(despesas).filter(d => d.ts && new Date(d.ts).getFullYear()===year);
+  const mgDesp  = despArr.filter(d=>d.veiculo==='mg');
+  const bmwDesp = despArr.filter(d=>d.veiculo==='bmw');
+
+  const sum = (arr,tipo) => arr.filter(d=>d.tipo===tipo).reduce((a,d)=>a+d.valor,0);
+
+  const mgIuc      = sum(mgDesp,'iuc');
+  const mgRevisao  = sum(mgDesp,'revisao');
+  const mgInspecao = sum(mgDesp,'inspecao');
+  const mgTotal    = mgEnergia + mgIuc + mgRevisao + mgInspecao;
+
+  const bmwIuc      = sum(bmwDesp,'iuc');
+  const bmwRevisao  = sum(bmwDesp,'revisao');
+  const bmwInspecao = sum(bmwDesp,'inspecao');
+  const bmwTotal    = bmwCombust + bmwIuc + bmwRevisao + bmwInspecao;
+
+  const totalSaving = bmwTotal - mgTotal;
+
+  // hero
+  const heroEl = document.getElementById('a-total-saving');
+  heroEl.textContent = (totalSaving>=0?'+':'')+totalSaving.toFixed(2)+' €';
+  heroEl.style.color = totalSaving>=0?'var(--green)':'var(--red)';
+  document.getElementById('a-total-lbl').textContent =
+    totalSaving>=0
+      ? `poupança total estimada em ${year} (combustível + despesas)`
+      : `custo extra estimado em ${year} vs BMW X3`;
+
+  // totals
+  document.getElementById('a-mg-total').textContent  = mgTotal.toFixed(2)+' €';
+  document.getElementById('a-bmw-total').textContent = bmwTotal.toFixed(2)+' €';
+
+  const fmtLine = (label,val) => val>0
+    ? `<div class="cost-line"><span>${label}</span><strong>${val.toFixed(2)} €</strong></div>` : '';
+  document.getElementById('a-mg-breakdown').innerHTML =
+    fmtLine('Energia (carregamentos)', mgEnergia)+
+    fmtLine('IUC', mgIuc)+
+    fmtLine('Revisões / Manutenção', mgRevisao)+
+    fmtLine('Inspeções', mgInspecao);
+  document.getElementById('a-bmw-breakdown').innerHTML =
+    fmtLine('Combustível estimado', bmwCombust)+
+    fmtLine('IUC', bmwIuc)+
+    fmtLine('Revisões / Manutenção', bmwRevisao)+
+    fmtLine('Inspeções', bmwInspecao);
+
+  // detail metrics
+  document.getElementById('a-energia').innerHTML  = mgEnergia.toFixed(2)+'<span>€</span>';
+  document.getElementById('a-iuc').innerHTML      = mgIuc>0 ? mgIuc.toFixed(2)+'<span>€</span>' : '—';
+  document.getElementById('a-revisao').innerHTML  = mgRevisao>0 ? mgRevisao.toFixed(2)+'<span>€</span>' : '—';
+  document.getElementById('a-inspecao').innerHTML = mgInspecao>0 ? mgInspecao.toFixed(2)+'<span>€</span>' : '—';
+  document.getElementById('a-km').innerHTML       = totKm>0 ? Math.round(totKm)+'<span>km</span>' : '—';
+
+  // donut chart MG
+  const canvas = document.getElementById('annualChart');
+  if(annualChart){ annualChart.destroy(); annualChart=null; }
+  const segments = [
+    { label:'Energia', val:mgEnergia, color:'#1aad7a' },
+    { label:'IUC',     val:mgIuc,     color:'#4a90e2' },
+    { label:'Revisões',val:mgRevisao, color:'#a78bfa' },
+    { label:'Inspeções',val:mgInspecao,color:'#e8971a' }
+  ].filter(s=>s.val>0);
+  if(segments.length===0){
+    canvas.style.display='none';
+    canvas.parentElement.innerHTML='<div class="empty" style="padding:20px">Sem dados para '+year+'</div>';
+    return;
+  }
+  canvas.style.display='block';
+  annualChart = new Chart(canvas,{
+    type:'doughnut',
+    data:{
+      labels: segments.map(s=>s.label),
+      datasets:[{ data:segments.map(s=>s.val), backgroundColor:segments.map(s=>s.color), borderWidth:0, hoverOffset:4 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ position:'right', labels:{ color:'#9998a0', font:{size:12}, boxWidth:12, padding:14 } },
+        tooltip:{ callbacks:{ label:ctx=>' '+ctx.label+': '+ctx.parsed.toFixed(2)+' €' } }
+      },
+      cutout:'65%'
+    }
+  });
+};
+
 function updateChart(arr) {
-  const canvas = document.getElementById('costChart');
-  if (chart) { chart.destroy(); chart = null; }
-  if (arr.length === 0) { canvas.textContent = 'Sem dados ainda.'; return; }
-  chart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: arr.map(s => s.date),
-      datasets: [
-        { label:'MG MGS5 EV', data:arr.map(s => parseFloat(s.evCost.toFixed(2))),  backgroundColor:'#1aad7a', borderRadius:5, borderSkipped:false },
-        { label:'BMW X3',     data:arr.map(s => parseFloat(s.bmwCost.toFixed(2))), backgroundColor:'#e8971a', borderRadius:5, borderSkipped:false }
+  const canvas=document.getElementById('costChart');
+  if(chart){ chart.destroy(); chart=null; }
+  if(arr.length===0){ canvas.textContent='Sem dados ainda.'; return; }
+  chart = new Chart(canvas,{
+    type:'bar',
+    data:{
+      labels:arr.map(s=>s.date),
+      datasets:[
+        { label:'MG MGS5 EV', data:arr.map(s=>parseFloat(s.evCost.toFixed(2))),  backgroundColor:'#1aad7a', borderRadius:5, borderSkipped:false },
+        { label:'BMW X3',     data:arr.map(s=>parseFloat(s.bmwCost.toFixed(2))), backgroundColor:'#e8971a', borderRadius:5, borderSkipped:false }
       ]
     },
-    options: {
+    options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:false }, tooltip:{ callbacks:{ label:ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} €` } } },
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} €`}} },
       scales:{
         x:{ grid:{display:false}, ticks:{color:'#5c5b65',font:{size:11},maxRotation:45}, border:{display:false} },
         y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'#5c5b65',font:{size:11},callback:v=>v.toFixed(0)+'€'}, border:{display:false} }
@@ -579,33 +827,38 @@ function updateChart(arr) {
   });
 }
 
-function renderAll() { renderDashboard(); renderSessions(); }
+function renderAll() {
+  renderDashboard();
+  renderSessions();
+  renderDespesas();
+  buildYearSelector();
+  renderAnual();
+}
 
-// ── UI helpers ────────────────────────────────────────────────
+// ── UI ────────────────────────────────────────────────────────
+const TAB_NAMES = ['dashboard','registar','despesas','anual','config'];
 window.switchTab = function(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['dashboard','registar','config'][i] === name);
-  });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',TAB_NAMES[i]===name));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(name==='anual') renderAnual();
   window.scrollTo(0,0);
 };
 
-function showError(msg) {
-  const el = document.getElementById('f-error');
-  el.textContent = msg; el.style.display = 'block';
+function showError(id, msg) {
+  const el=document.getElementById(id);
+  el.textContent=msg; el.style.display='block';
 }
-
 function showToast(msg) {
-  let t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div'); t.id = 'toast';
-    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1aad7a;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:99px;transition:transform 0.25s,opacity 0.25s;opacity:0;z-index:9999;pointer-events:none;font-family:var(--font)';
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1aad7a;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:99px;transition:transform 0.25s,opacity 0.25s;opacity:0;z-index:9999;pointer-events:none;font-family:var(--font)';
     document.body.appendChild(t);
   }
-  t.textContent = msg;
-  t.style.transform = 'translateX(-50%) translateY(0)'; t.style.opacity = '1';
-  setTimeout(() => { t.style.transform = 'translateX(-50%) translateY(60px)'; t.style.opacity = '0'; }, 2200);
+  t.textContent=msg;
+  t.style.transform='translateX(-50%) translateY(0)'; t.style.opacity='1';
+  setTimeout(()=>{ t.style.transform='translateX(-50%) translateY(60px)'; t.style.opacity='0'; },2200);
 }
 </script>
 </body>
