@@ -216,6 +216,12 @@ footer{margin-top:auto;padding:20px 0 28px;text-align:center;font-size:11px;colo
       </div>
     </div>
     <div class="card">
+      <div class="card-title">Poupança acumulada ao longo do tempo</div>
+      <div class="chart-wrap">
+        <canvas id="savingChart" role="img" aria-label="Poupança acumulada">Sem dados ainda.</canvas>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-title">Eficiência média</div>
       <div class="metrics metrics-4">
         <div class="metric"><div class="metric-label">kWh / 100 km</div><div class="metric-val" id="d-kwh100">—</div></div>
@@ -475,6 +481,7 @@ let conf      = { ...DEFAULT_CONF };
 let editKey   = null;
 let despType  = 'iuc';
 let chart     = null;
+let savingChart = null;
 let annualChart = null;
 let loadedSessions = false;
 let loadedDespesas = false;
@@ -518,10 +525,19 @@ function loadConfToForm() {
   document.getElementById('c-cons-bmw').value= conf.consBmw;
   document.getElementById('c-bat-cap').value = conf.batCap;
 }
+function todayLabel() {
+  const d = new Date();
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
 function prefillSessionPrices() {
   document.getElementById('f-gasoleo').value     = conf.gasoleo;
   document.getElementById('f-gasoleo-est').value = conf.gasoleo;
   document.getElementById('f-tarifa').value      = conf.tarifa;
+}
+function prefillDate() {
+  const el = document.getElementById('f-date');
+  if (!el.value) el.value = todayLabel();
 }
 window.saveConfig = function() {
   const nc = {
@@ -619,6 +635,7 @@ window.editSession = function(key) {
 window.cancelEdit = function() {
   editKey=null;
   ['f-date','f-km','f-bat-start','f-bat-end','f-km-rest','f-est-custo','f-est-nome'].forEach(id=>document.getElementById(id).value='');
+  prefillDate();
   selectChargeType('casa');
   prefillSessionPrices();
   document.getElementById('edit-banner').style.display='none';
@@ -679,7 +696,7 @@ function renderDashboard() {
     document.getElementById('d-sub').textContent='Adiciona a primeira sessão para começar.';
     ['d-km','d-kwh','d-ev-cost','d-bmw-cost','d-kwh100','d-sessoes','d-pct','d-sav100']
       .forEach(id=>document.getElementById(id).textContent='—');
-    updateChart([]); return;
+    updateChart([]); updateSavingChart([]); return;
   }
   const totKm=arr.reduce((a,s)=>a+s.km,0);
   const totKwh=arr.reduce((a,s)=>a+s.kwh,0);
@@ -705,6 +722,7 @@ function renderDashboard() {
   document.getElementById('d-pct').innerHTML=avgPct.toFixed(1)+'<span>%</span>';
   document.getElementById('d-sav100').innerHTML=(sav100>=0?'+':'')+sav100.toFixed(2)+'<span>€/100km</span>';
   updateChart(arr);
+  updateSavingChart(arr);
 }
 
 function renderSessions() {
@@ -904,6 +922,50 @@ function updateChart(arr) {
   });
 }
 
+function updateSavingChart(arr) {
+  const canvas = document.getElementById('savingChart');
+  if(savingChart){ savingChart.destroy(); savingChart=null; }
+  if(arr.length===0){ canvas.textContent='Sem dados ainda.'; return; }
+  // build cumulative saving series
+  let cumulative = 0;
+  const labels = arr.map(s=>s.date);
+  const data   = arr.map(s=>{ cumulative += s.saving; return parseFloat(cumulative.toFixed(2)); });
+  const isPositive = data[data.length-1] >= 0;
+  savingChart = new Chart(canvas,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:'Poupança acumulada',
+        data,
+        borderColor: isPositive ? '#1aad7a' : '#e85a5a',
+        backgroundColor: isPositive ? 'rgba(26,173,122,0.08)' : 'rgba(232,90,90,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: isPositive ? '#1aad7a' : '#e85a5a',
+        pointRadius: arr.length > 20 ? 2 : 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ callbacks:{ label:ctx=>' Poupança: '+(ctx.parsed.y>=0?'+':'')+ctx.parsed.y.toFixed(2)+' €' } }
+      },
+      scales:{
+        x:{ grid:{display:false}, ticks:{color:'#5c5b65',font:{size:11},maxRotation:45}, border:{display:false} },
+        y:{
+          grid:{color:'rgba(255,255,255,0.04)'},
+          ticks:{color:'#5c5b65',font:{size:11},callback:v=>(v>=0?'+':'')+v.toFixed(0)+'€'},
+          border:{display:false}
+        }
+      }
+    }
+  });
+}
+
 function renderAll() {
   renderDashboard();
   renderSessions();
@@ -919,6 +981,7 @@ window.switchTab = function(name) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+name).classList.add('active');
   if(name==='anual') renderAnual();
+  if(name==='registar') prefillDate();
   window.scrollTo(0,0);
 };
 
